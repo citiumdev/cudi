@@ -1,7 +1,11 @@
+---
+import NavBarMenu from "@/components/NavBarMenu.tsx";
+---
+
 <nav class="fixed left-0 top-0 z-10 flex w-full">
   <div class="container mx-auto max-w-2xl px-2 py-2">
     <div
-      class="flex h-12 items-center justify-center overflow-hidden rounded-full border border-neutral-700 bg-neutral-950/50 backdrop-blur"
+      class="hidden h-12 items-center justify-center overflow-hidden rounded-full border border-neutral-700 bg-neutral-950/50 backdrop-blur sm:flex"
     >
       <a
         href="#home"
@@ -27,6 +31,10 @@
       >
         Contacto
       </a>
+    </div>
+
+    <div class="flex justify-end sm:hidden">
+      <NavBarMenu client:load />
     </div>
   </div>
 </nav>
