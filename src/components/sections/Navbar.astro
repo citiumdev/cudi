@@ -1,40 +1,52 @@
 ---
 import NavBarMenu from "@/components/NavBarMenu.tsx";
+import UserDropdown from "@/components/UserDropdown.tsx";
+import Logo from "@/components/svg/logo.astro";
+import { getSession } from "auth-astro/server";
+
+const session = await getSession(Astro.request);
 ---
 
 <nav class="fixed left-0 top-0 z-10 flex w-full">
-  <div class="container mx-auto max-w-2xl px-2 py-2">
-    <div
-      class="hidden h-12 items-center justify-center overflow-hidden rounded-full border border-neutral-700 bg-neutral-950/50 backdrop-blur sm:flex"
-    >
-      <a
-        href="#home"
-        class="flex h-full flex-1 items-center justify-center px-4 text-sm text-white hover:bg-chetwode-800/10 md:text-base"
-      >
-        Inicio
-      </a>
-      <a
-        href="#about"
-        class="flex h-full flex-1 items-center justify-center px-4 text-sm text-white hover:bg-chetwode-800/10 md:text-base"
-      >
-        Nosotros
-      </a>
-      <a
-        href="#events"
-        class="flex h-full flex-1 items-center justify-center px-4 text-sm text-white hover:bg-chetwode-800/10 md:text-base"
-      >
-        Eventos
-      </a>
-      <a
-        href="#contact"
-        class="flex h-full flex-1 items-center justify-center px-4 text-sm text-white hover:bg-chetwode-800/10 md:text-base"
-      >
-        Contacto
-      </a>
-    </div>
+  <div
+    class="container mx-auto hidden w-full items-center gap-4 px-6 py-4 sm:flex"
+  >
+    <Logo class="size-12 fill-white" />
 
-    <div class="flex justify-end sm:hidden">
-      <NavBarMenu client:load />
+    <div class="container mx-auto max-w-2xl">
+      <div
+        class="flex h-12 items-center justify-center overflow-hidden rounded-full border border-neutral-700 bg-neutral-950/50 backdrop-blur"
+      >
+        <a
+          href="#home"
+          class="flex h-full flex-1 items-center justify-center px-4 text-sm text-white hover:bg-chetwode-800/10 md:text-base"
+        >
+          Inicio
+        </a>
+        <a
+          href="#about"
+          class="flex h-full flex-1 items-center justify-center px-4 text-sm text-white hover:bg-chetwode-800/10 md:text-base"
+        >
+          Nosotros
+        </a>
+        <a
+          href="#events"
+          class="flex h-full flex-1 items-center justify-center px-4 text-sm text-white hover:bg-chetwode-800/10 md:text-base"
+        >
+          Eventos
+        </a>
+        <a
+          href="#contact"
+          class="flex h-full flex-1 items-center justify-center px-4 text-sm text-white hover:bg-chetwode-800/10 md:text-base"
+        >
+          Contacto
+        </a>
+      </div>
     </div>
+    <UserDropdown user={session?.user || null} client:load />
+  </div>
+
+  <div class="flex w-full items-center justify-end gap-4 px-6 py-4 sm:hidden">
+    <NavBarMenu user={session?.user || null} client:load />
   </div>
 </nav>

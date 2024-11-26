@@ -1,0 +1,42 @@
+---
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import { Button } from "@/components/ui/button.tsx";
+
+import CouseImage from "@/assets/course.png";
+import { Image } from "astro:assets";
+---
+
+<DashboardLayout>
+  <div class="@container">
+    <div
+      class="@xl:grid-cols-2 @4xl:grid-cols-3 @7xl:grid-cols-4 grid flex-1 grid-cols-1 gap-6"
+    >
+      {
+        Array.from({ length: 10 }).map((_, i) => (
+          <div class="overflow-hidden rounded-lg border bg-white shadow-md dark:bg-neutral-900">
+            <div class="relative aspect-square w-full">
+              <Image
+                src={CouseImage}
+                alt="Curso"
+                class="absolute h-full w-full object-cover"
+              />
+            </div>
+
+            <div class="flex flex-col p-4">
+              <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">
+                Curso {i + 1}
+              </h2>
+              <p class="text-gray-600 dark:text-gray-300">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
+                eiusmod tempor incididunt ut labore et dolore magna aliqua.
+              </p>
+              <div class="mt-4 flex w-full flex-col">
+                <Button>Inscribirse</Button>
+              </div>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</DashboardLayout>
