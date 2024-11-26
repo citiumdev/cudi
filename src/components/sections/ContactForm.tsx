@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { twJoin } from "tailwind-merge";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "../ui/button";
 
 const formSchema = z.object({
   name: z.string().trim().min(1, "El nombre es obligatorio"),
@@ -126,9 +127,7 @@ export default function ContactForm() {
         </p>
       </div>
 
-      <button className="flex w-full items-center justify-center rounded-md border border-neutral-800 bg-chetwode-600 py-2 hover:bg-chetwode-600/90">
-        <span className="font-bold text-neutral-100">Enviar</span>
-      </button>
+      <Button className="w-full">Enviar</Button>
     </form>
   );
 }
