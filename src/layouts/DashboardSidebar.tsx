@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/sidebar";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { signIn, signOut } from "auth-astro/client";
+import { signOut } from "auth-astro/client";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,17 +37,17 @@ interface Props {
 const items = [
   {
     title: "Inicio",
-    url: "#",
+    url: "/",
     icon: Home,
   },
   {
     title: "Certificados",
-    url: "#",
+    url: "/certificates",
     icon: Inbox,
   },
   {
     title: "Eventos",
-    url: "#",
+    url: "/events",
     icon: Calendar,
   },
 ];
@@ -72,7 +72,7 @@ export default function DashboardSidebar({ user, children }: Props) {
                 {items.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
-                      <a href={item.url}>
+                      <a href={"/dashboard" + item.url}>
                         <item.icon />
                         <span>{item.title}</span>
                       </a>
