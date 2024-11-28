@@ -53,44 +53,10 @@ const session = defineTable({
   ],
 });
 
-const verificationToken = defineTable({
-  columns: {
-    identifier: c.text(),
-    token: c.text(),
-    expires: c.number(),
-  },
-  indexes: [
-    {
-      on: ["identifier", "token"],
-    },
-  ],
-});
-
-const authenticator = defineTable({
-  columns: {
-    cedentialID: c.text({ unique: true }),
-    userId: c.text(),
-    providerAccountId: c.text(),
-    credentialPublicKey: c.text(),
-    counter: c.number(),
-    credentialDeviceType: c.text(),
-    credentialBackedUp: c.number(),
-    transports: c.text(),
-  },
-  foreignKeys: [
-    {
-      columns: ["userId"],
-      references: () => [user.columns.id],
-    },
-  ],
-});
-
 export default defineDb({
   tables: {
     user,
     account,
     session,
-    verificationToken,
-    authenticator,
   },
 });
