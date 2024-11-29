@@ -1,7 +1,7 @@
 import GitHub from "@auth/core/providers/github";
 import { defineConfig } from "auth-astro";
-import { DrizzleAdapter } from "@auth/drizzle-adapter";
-import { db } from "astro:db";
+import type { User } from "@/types/user";
+import { AstroDBAdapter } from "adapter";
 
 declare module "@auth/core/types" {
   interface Session extends DefaultSession {
@@ -10,6 +10,7 @@ declare module "@auth/core/types" {
       name: string;
       email: string;
       image: string;
+      role: "user" | "admin";
     };
   }
 }
@@ -21,17 +22,14 @@ export default defineConfig({
       clientSecret: import.meta.env.GITHUB_CLIENT_SECRET,
     }),
   ],
-  adapter: DrizzleAdapter(db as any),
+  adapter: AstroDBAdapter(),
   callbacks: {
-    session({ session, user }) {
+    session({ session }) {
       return {
         ...session,
         user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          image: user.image,
-        },
+          ...session.user,
+        } satisfies User,
       };
     },
   },

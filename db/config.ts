@@ -6,6 +6,9 @@ const user = defineTable({
       primaryKey: true,
       default: sql`select uuid4()`,
     }),
+    role: c.text({
+      default: "user",
+    }),
     name: c.text({
       optional: true,
     }),
@@ -53,10 +56,82 @@ const session = defineTable({
   ],
 });
 
+const event = defineTable({
+  columns: {
+    id: c.text({
+      primaryKey: true,
+      default: sql`select uuid4()`,
+    }),
+    name: c.text(),
+    image: c.text(),
+    date: c.number(),
+    duration: c.number(),
+  },
+});
+
+const eventPresenters = defineTable({
+  columns: {
+    eventId: c.text(),
+    userId: c.text(),
+  },
+  foreignKeys: [
+    {
+      columns: ["eventId"],
+      references: () => [event.columns.id],
+    },
+    {
+      columns: ["userId"],
+      references: () => [user.columns.id],
+    },
+  ],
+});
+
+const eventParticipants = defineTable({
+  columns: {
+    eventId: c.text(),
+    userId: c.text(),
+  },
+  foreignKeys: [
+    {
+      columns: ["eventId"],
+      references: () => [event.columns.id],
+    },
+    {
+      columns: ["userId"],
+      references: () => [user.columns.id],
+    },
+  ],
+});
+
+const certificate = defineTable({
+  columns: {
+    id: c.text({
+      primaryKey: true,
+      default: sql`select uuid4()`,
+    }),
+    userId: c.text(),
+    eventId: c.text(),
+  },
+  foreignKeys: [
+    {
+      columns: ["userId"],
+      references: () => [user.columns.id],
+    },
+    {
+      columns: ["eventId"],
+      references: () => [event.columns.id],
+    },
+  ],
+});
+
 export default defineDb({
   tables: {
     user,
     account,
     session,
+    event,
+    eventPresenters,
+    eventParticipants,
+    certificate,
   },
 });
