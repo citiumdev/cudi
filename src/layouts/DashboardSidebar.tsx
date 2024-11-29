@@ -30,10 +30,6 @@ import { Calendar, Home, Inbox } from "lucide-react";
 import type { User } from "@/types/user";
 import { Button } from "@/components/ui/button";
 
-interface Props {
-  children: React.ReactNode;
-}
-
 const items = [
   {
     title: "Inicio",
@@ -53,7 +49,7 @@ const items = [
 ];
 
 interface Props {
-  childre: React.ReactNode;
+  children: React.ReactNode;
   user: User;
 }
 
