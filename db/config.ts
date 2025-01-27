@@ -112,6 +112,9 @@ const certificate = defineTable({
     }),
     userId: c.text(),
     eventId: c.text(),
+    hashKey: c.text({
+      optional: true,
+    }),
   },
   foreignKeys: [
     {

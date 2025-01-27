@@ -4,38 +4,134 @@ import { JSDOM } from "jsdom";
 import path from "node:path";
 import QRCodeStyling from "qr-code-styling";
 import { certificate, db, eq, event, user } from "astro:db";
+import { certificateSchema, type Certificate } from "@/types/certificate";
+import crypto from "crypto";
+import {
+  deleteCertificateImage,
+  findCertificateImage,
+  uploadCertificateImage,
+} from "@/utils/uploads";
 
 export const GET: APIRoute = async ({ params, request }) => {
-  const id = params.id as string;
+  try {
+    const id = params.id as string;
 
-  const isPdf = new URL(request.url).searchParams.get("pdf") === "true";
+    const isPdf = new URL(request.url).searchParams.get("pdf") === "true";
 
-  const result = await db
-    .select()
-    .from(certificate)
-    .innerJoin(event, eq(certificate.eventId, event.id))
-    .innerJoin(user, eq(certificate.userId, user.id))
-    .where(eq(certificate.id, id))
-    .get();
+    const result = await db
+      .select()
+      .from(certificate)
+      .innerJoin(event, eq(certificate.eventId, event.id))
+      .innerJoin(user, eq(certificate.userId, user.id))
+      .where(eq(certificate.id, id))
+      .get();
 
-  if (!result) {
-    return new Response(JSON.stringify({ message: "Certificate not found" }), {
-      status: 404,
-      headers: {
-        "content-type": "application/json",
-      },
+    if (!result) {
+      return new Response(
+        JSON.stringify({ message: "Certificate not found" }),
+        {
+          status: 404,
+          headers: {
+            "content-type": "application/json",
+          },
+        },
+      );
+    }
+
+    const parsed = certificateSchema.parse({
+      id: result.certificate.id,
+      user: result.user,
+      event: result.event,
     });
-  }
 
-  const name = result.user.name;
-  const title = result.event.name;
-  const month = new Date(result.event.date).toLocaleDateString("es-ES", {
+    if (isPdf) {
+      const { buffer, contentType } = await generateImage({
+        certificate: parsed,
+        isPdf,
+      });
+
+      return new Response(buffer, {
+        headers: {
+          "Content-Type": contentType,
+        },
+      });
+    }
+
+    const prevKey = result.certificate.hashKey;
+    const hashKey = createHashKey(parsed);
+
+    if (prevKey !== hashKey) {
+      await db
+        .update(certificate)
+        .set({ hashKey })
+        .where(eq(certificate.id, id))
+        .run();
+
+      const { buffer, contentType } = await generateImage({
+        certificate: parsed,
+        isPdf: false,
+      });
+
+      if (prevKey) {
+        await deleteCertificateImage({ hashKey: prevKey });
+      }
+
+      await uploadCertificateImage({ hashKey, image: buffer });
+
+      return new Response(buffer, {
+        headers: {
+          "Content-Type": contentType,
+        },
+      });
+    }
+
+    const { url } = await findCertificateImage({ hashKey });
+
+    if (!url) {
+      const { buffer, contentType } = await generateImage({
+        certificate: parsed,
+        isPdf: false,
+      });
+
+      await uploadCertificateImage({ hashKey, image: buffer });
+
+      return new Response(buffer, {
+        headers: {
+          "Content-Type": contentType,
+        },
+      });
+    }
+
+    return Response.redirect(url, 302);
+  } catch (error) {
+    return new Response(
+      JSON.stringify({ message: "Error generating certificate image" }),
+      {
+        status: 500,
+        headers: {
+          "content-type": "application/json",
+        },
+      },
+    );
+  }
+};
+
+const generateImage = async ({
+  certificate,
+  isPdf,
+}: {
+  certificate: Certificate;
+  isPdf: boolean;
+}) => {
+  const name = certificate.user.name;
+  const title = certificate.event.name;
+  const month = new Date(certificate.event.date).toLocaleDateString("es-ES", {
     month: "long",
   });
 
   const capitalizedMonth = month.charAt(0).toUpperCase() + month.slice(1);
 
-  const year = new Date(result.event.date).getFullYear();
+  const year = new Date(certificate.event.date).getFullYear();
   const date = `${capitalizedMonth}, ${year}`;
 
   const url = "cudicoders.dev/c/b3b450fd-2872-4b83-99fa-56b59737048d";
@@ -93,11 +189,10 @@ export const GET: APIRoute = async ({ params, request }) => {
 
   const contentType = isPdf ? "application/pdf" : "image/png";
 
-  return new Response(canvas.toBuffer(), {
-    headers: {
-      "Content-Type": contentType,
-    },
-  });
+  return {
+    buffer: canvas.toBuffer(),
+    contentType,
+  };
 };
 
 const loadImage = async (src: string | Buffer) => {
@@ -106,4 +201,8 @@ const loadImage = async (src: string | Buffer) => {
     img.onload = () => resolve(img);
     img.src = src;
   });
+};
+
+const createHashKey = (data: Certificate) => {
+  return crypto.createHash("sha256").update(JSON.stringify(data)).digest("hex");
 };
