@@ -1,7 +1,45 @@
 ---
 import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import CertificateCard from "@/components/dashboard/CertificateCard.tsx";
+
+import { db, user, event, eq, certificate } from "astro:db";
+import { certificateSchema } from "@/types/certificate";
+import { getSession } from "auth-astro/server";
+
+import type { User } from "@/types/user";
+
+const session = await getSession(Astro.request);
+const sessionUser = session?.user as User;
+
+const rows = await db
+  .select({
+    id: certificate.id,
+    event,
+    user,
+  })
+  .from(certificate)
+  .innerJoin(event, eq(event.id, certificate.eventId))
+  .innerJoin(user, eq(user.id, certificate.userId))
+  .where(eq(certificate.userId, sessionUser.id))
+  .all();
+
+const certificates = certificateSchema.array().parse(rows);
 ---
 
 <DashboardLayout>
-  <div>Certificados</div>
+  <div class="@container">
+    <h1 class="mb-6 text-2xl font-semibold">Tus certificados</h1>
+
+    {
+      certificates.length === 0 ? (
+        <p class="text-lg text-neutral-500">No tienes certificados aún.</p>
+      ) : (
+        <div class="grid flex-1 grid-cols-1 gap-4 @3xl:grid-cols-2 @7xl:grid-cols-3">
+          {certificates.map((c) => (
+            <CertificateCard certificate={c} client:load />
+          ))}
+        </div>
+      )
+    }
+  </div>
 </DashboardLayout>

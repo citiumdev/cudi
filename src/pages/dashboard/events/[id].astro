@@ -1,0 +1,65 @@
+---
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import EventDetails from "@/components/dashboard/EventDetails.tsx";
+
+import { db, user, event, eventPresenters, eq, alias } from "astro:db";
+import { z } from "zod";
+import { eventSchema } from "@/types/event";
+import { userSchema } from "@/types/user";
+
+const eventId = Astro.params.id as string;
+
+const presenter = alias(user, "presenter");
+
+const rows = await db
+  .select({
+    event,
+    presenter,
+  })
+  .from(event)
+  .innerJoin(eventPresenters, eq(event.id, eventPresenters.eventId))
+  .innerJoin(presenter, eq(presenter.id, eventPresenters.userId))
+  .where(eq(event.id, eventId))
+  .all();
+
+type DBEvent = typeof event.$inferSelect;
+type DBUser = typeof user.$inferSelect;
+
+const result = rows.reduce<
+  | {
+      event: DBEvent;
+      presenters: DBUser[];
+    }
+  | undefined
+>((acc, row) => {
+  const rowEvent = row.event;
+  const rowPresenter = row.presenter;
+
+  if (!acc) {
+    acc = { event: rowEvent, presenters: [] };
+  }
+
+  acc.presenters.push(rowPresenter);
+
+  return acc;
+}, undefined);
+
+const schema = z.object({
+  event: eventSchema,
+  presenters: z.array(userSchema),
+});
+
+const parsedEvent = schema.parse(result);
+
+const admins = await db.select().from(user).where(eq(user.role, "admin"));
+const parsedAdmins = userSchema.array().parse(admins);
+---
+
+<DashboardLayout>
+  <EventDetails
+    event={parsedEvent.event}
+    presenters={parsedEvent.presenters}
+    presentersOptions={parsedAdmins}
+    client:only="react"
+  />
+</DashboardLayout>

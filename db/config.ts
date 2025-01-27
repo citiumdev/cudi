@@ -4,7 +4,7 @@ const user = defineTable({
   columns: {
     id: c.text({
       primaryKey: true,
-      default: sql`select uuid4()`,
+      default: sql`(select uuid4())`,
     }),
     role: c.text({
       default: "user",
@@ -60,12 +60,13 @@ const event = defineTable({
   columns: {
     id: c.text({
       primaryKey: true,
-      default: sql`select uuid4()`,
+      default: sql`(select uuid4())`,
     }),
     name: c.text(),
     image: c.text(),
     date: c.number(),
     duration: c.number(),
+    done: c.boolean({ default: false }),
   },
 });
 
@@ -107,7 +108,7 @@ const certificate = defineTable({
   columns: {
     id: c.text({
       primaryKey: true,
-      default: sql`select uuid4()`,
+      default: sql`(select uuid4())`,
     }),
     userId: c.text(),
     eventId: c.text(),

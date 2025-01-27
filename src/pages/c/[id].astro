@@ -1,0 +1,35 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import CertificatePage from "@/components/certificate/CertificatePage.tsx";
+
+import { db, user, event, eq, certificate } from "astro:db";
+const { id } = Astro.params;
+import { certificateSchema } from "@/types/certificate";
+
+const rows = await db
+  .select({
+    id: certificate.id,
+    event,
+    user,
+  })
+  .from(certificate)
+  .innerJoin(event, eq(event.id, certificate.eventId))
+  .innerJoin(user, eq(user.id, certificate.userId))
+  .where(eq(certificate.id, id as string))
+  .get();
+
+const result = certificateSchema.safeParse(rows);
+---
+
+<Layout>
+  {
+    result.success ? (
+      <CertificatePage certificate={result.data} />
+    ) : (
+      <main class="flex h-screen items-center justify-center">
+        <div class="absolute top-0 z-[-2] h-screen w-full bg-background bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(140,82,255,0.3),rgba(255,255,255,0))]" />
+        <h1 class="text-2xl font-bold">El certificado no existe</h1>
+      </main>
+    )
+  }
+</Layout>

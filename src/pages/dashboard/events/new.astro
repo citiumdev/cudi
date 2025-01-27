@@ -1,0 +1,13 @@
+---
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import CreateEventsForm from "@/components/dashboard/CreateEventsForm.tsx";
+import { userSchema } from "@/types/user";
+import { db, eq, user } from "astro:db";
+
+const admins = await db.select().from(user).where(eq(user.role, "admin"));
+const parsedAdmins = userSchema.array().parse(admins);
+---
+
+<DashboardLayout>
+  <CreateEventsForm client:only="react" presentersOptions={parsedAdmins} />
+</DashboardLayout>

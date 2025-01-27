@@ -7,9 +7,8 @@ import {
   user,
   event,
   eventPresenters,
-  eq,
   eventParticipants,
-  alias,
+  eq,
 } from "astro:db";
 import { z } from "zod";
 import { eventSchema } from "@/types/event";
@@ -20,19 +19,13 @@ import type { User } from "@/types/user";
 const session = await getSession(Astro.request);
 const sessionUser = session?.user as User;
 
-const presenter = alias(user, "presenter");
-
 const rows = await db
-  .select({
-    event,
-    eventParticipants,
-    presenter,
-  })
-  .from(event)
-  .leftJoin(eventParticipants, eq(event.id, eventParticipants.eventId))
+  .select()
+  .from(eventParticipants)
+  .innerJoin(event, eq(event.id, eventParticipants.eventId))
   .innerJoin(eventPresenters, eq(event.id, eventPresenters.eventId))
-  .innerJoin(presenter, eq(presenter.id, eventPresenters.userId))
-  .where(eq(event.done, false))
+  .innerJoin(user, eq(user.id, eventPresenters.userId))
+  .where(eq(eventParticipants.userId, sessionUser.id))
   .all();
 
 type DBEvent = typeof event.$inferSelect;
@@ -45,7 +38,7 @@ const result = rows.reduce<
   >
 >((acc, row) => {
   const rowEvent = row.event;
-  const rowPresenter = row.presenter;
+  const rowPresenter = row.user;
   const rowParticipant = row.eventParticipants;
 
   if (!acc[rowEvent.id]) {
@@ -53,10 +46,7 @@ const result = rows.reduce<
   }
 
   acc[rowEvent.id].presenters.push(rowPresenter);
-
-  if (rowParticipant) {
-    acc[rowEvent.id].participantsId.push(rowParticipant.userId);
-  }
+  acc[rowEvent.id].participantsId.push(rowParticipant.userId);
 
   return acc;
 }, {});
@@ -74,21 +64,25 @@ const events = schema.parse(Object.values(result));
 
 <DashboardLayout>
   <div class="@container">
-    <h1 class="mb-6 text-2xl font-semibold">Eventos disponibles</h1>
-    <div
-      class="grid flex-1 grid-cols-1 gap-6 @xl:grid-cols-2 @4xl:grid-cols-3 @7xl:grid-cols-4"
-    >
-      {
-        events.map((e) => (
-          <EventCard
-            event={e.event}
-            presenters={e.presenters}
-            currentUserIsParticipant={e.participantsId.includes(sessionUser.id)}
-            currentUserIsAdmin={sessionUser.role === "admin"}
-            client:load
-          />
-        ))
-      }
-    </div>
+    <h1 class="mb-6 text-2xl font-semibold">Eventos inscritos</h1>
+    {
+      events.length === 0 ? (
+        <p class="text-lg text-neutral-500">No tienes eventos inscritos aún.</p>
+      ) : (
+        <div class="grid flex-1 grid-cols-1 gap-6 @xl:grid-cols-2 @4xl:grid-cols-3 @7xl:grid-cols-4">
+          {events.map((e) => (
+            <EventCard
+              event={e.event}
+              presenters={e.presenters}
+              currentUserIsParticipant={e.participantsId.includes(
+                sessionUser.id,
+              )}
+              currentUserIsAdmin={sessionUser.role === "admin"}
+              client:load
+            />
+          ))}
+        </div>
+      )
+    }
   </div>
 </DashboardLayout>

@@ -3,6 +3,7 @@ import "@/styles/global.css";
 import DashboardSidebar from "@/layouts/DashboardSidebar.tsx";
 import { getSession } from "auth-astro/server";
 import type { User } from "@/types/user";
+import Providers from "@/components/dashboard/Providers";
 
 const title = "CUDI";
 const description = "Comunidad Universitaria Desarrollo e Innovación";
@@ -42,8 +43,10 @@ const session = await getSession(Astro.request);
     <link rel="canonical" href={url} />
   </head>
   <body>
-    <DashboardSidebar user={session?.user as User} client:load>
-      <slot />
-    </DashboardSidebar>
+    <Providers client:load>
+      <DashboardSidebar user={session?.user as User} client:load>
+        <slot />
+      </DashboardSidebar>
+    </Providers>
   </body>
 </html>

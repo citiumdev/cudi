@@ -1,0 +1,149 @@
+import type { User } from "@/types/user";
+import type { Event } from "@/types/event";
+import { Button } from "../ui/button";
+import { Calendar, Clock, Pencil } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
+
+interface Props {
+  event: Event;
+  presenters: Omit<User, "email">[];
+  currentUserIsParticipant: boolean;
+  currentUserIsAdmin: boolean;
+}
+
+export default function EventCard({
+  event,
+  presenters,
+  currentUserIsParticipant,
+  currentUserIsAdmin,
+}: Props) {
+  const { toast } = useToast();
+  const [isRegistered, setIsRegistered] = useState(currentUserIsParticipant);
+
+  const parsedDate = new Date(event.date).toLocaleDateString("es-ES", {
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    hourCycle: "h12",
+  });
+
+  const handleRegister = async () => {
+    const res = await fetch(`/api/events/${event.id}/participants`, {
+      method: "POST",
+    });
+
+    if (res.ok) {
+      setIsRegistered(true);
+      toast({
+        title: "Inscripción exitosa",
+        description: "Te has inscrito en el evento",
+      });
+    } else {
+      toast({
+        title: "Error",
+        description: "Hubo un error al inscribirte en el evento",
+      });
+    }
+  };
+
+  const handleUnregister = async () => {
+    const res = await fetch(`/api/events/${event.id}/participants`, {
+      method: "DELETE",
+    });
+
+    if (res.ok) {
+      setIsRegistered(false);
+      toast({
+        title: "Baja exitosa",
+        description: "Te has dado de baja del evento",
+      });
+    } else {
+      toast({
+        title: "Error",
+        description: "Hubo un error al darte de baja del evento",
+      });
+    }
+  };
+
+  return (
+    <div className="relative overflow-hidden rounded-lg border bg-white shadow-md dark:bg-neutral-900">
+      {currentUserIsAdmin ? (
+        <Button
+          variant="secondary"
+          size="icon"
+          className="absolute right-2 top-2 z-10 rounded-full"
+          asChild
+        >
+          <a href={`/dashboard/events/${event.id}`}>
+            <Pencil />
+          </a>
+        </Button>
+      ) : null}
+
+      <div className="relative aspect-square w-full">
+        <img
+          src={event.image}
+          alt={event.name}
+          className="absolute h-full w-full object-cover"
+        />
+      </div>
+      <div className="flex flex-col gap-2 p-4">
+        <h2 className="text-xl font-bold text-neutral-800 dark:text-neutral-100">
+          {event.name}
+        </h2>
+        <div className="flex items-center gap-2 text-neutral-400">
+          <Calendar className="h-4 w-4" />
+          <span className="text-sm">{parsedDate}</span>
+        </div>
+        <div className="flex items-center gap-2 text-neutral-400">
+          <Clock className="h-4 w-4" />
+          <span className="text-sm">{event.duration} horas</span>
+        </div>
+        <div className="flex flex-col gap-2">
+          <h3 className="font-bold text-neutral-800 dark:text-neutral-100">
+            Presentadores
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {[...presenters].map((presenter) => (
+              <div
+                key={presenter.id}
+                className="flex items-center gap-2 rounded-full bg-neutral-800 p-1 pr-2"
+              >
+                <Avatar className="size-6">
+                  <AvatarImage src={presenter.image} />
+                  <AvatarFallback>{presenter.name[0]}</AvatarFallback>
+                </Avatar>
+                <span className="text-xs font-bold">{presenter.name}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-4 flex w-full flex-col gap-2">
+            <p className="text-sm text-neutral-400">
+              {event.done
+                ? "El evento ya se realizó"
+                : isRegistered
+                  ? "Ya estás inscrito"
+                  : "Inscríbete en este evento"}
+            </p>
+            <Button
+              disabled={event.done}
+              onClick={isRegistered ? handleUnregister : handleRegister}
+              variant={isRegistered && !event.done ? "destructive" : "default"}
+            >
+              {event.done
+                ? "Evento realizado"
+                : isRegistered
+                  ? "Darse de baja"
+                  : "Inscribirse"}
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

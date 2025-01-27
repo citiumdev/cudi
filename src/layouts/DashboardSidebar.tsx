@@ -26,7 +26,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { Calendar, Home, Inbox } from "lucide-react";
+import { Calendar, CalendarPlus, Home, Inbox } from "lucide-react";
 import type { User } from "@/types/user";
 import { Button } from "@/components/ui/button";
 
@@ -42,9 +42,17 @@ const items = [
     icon: Inbox,
   },
   {
-    title: "Eventos",
-    url: "/events",
+    title: "Eventos Inscritos",
+    url: "/registered",
     icon: Calendar,
+  },
+];
+
+const adminItems = [
+  {
+    title: "Crear Eventos",
+    url: "/events/new",
+    icon: CalendarPlus,
   },
 ];
 
@@ -78,6 +86,25 @@ export default function DashboardSidebar({ user, children }: Props) {
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
+          {user.role === "admin" ? (
+            <SidebarGroup>
+              <SidebarGroupLabel>Administrador</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {adminItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <a href={"/dashboard" + item.url}>
+                          <item.icon />
+                          <span>{item.title}</span>
+                        </a>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          ) : null}
         </SidebarContent>
         <SidebarFooter className="bg-background p-4">
           <DropdownMenu>
@@ -116,7 +143,9 @@ export default function DashboardSidebar({ user, children }: Props) {
           <Separator orientation="vertical" className="mr-2 h-4" />
           <h1 className="text-lg font-bold">Panel</h1>
         </header>
-        <div className="flex flex-1 flex-col gap-4 p-8">{children}</div>
+        <div className="flex flex-1 flex-col gap-4 p-8">
+          {children}
+        </div>
       </SidebarInset>
     </SidebarProvider>
   );
