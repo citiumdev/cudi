@@ -1,5 +1,6 @@
 import { eventSchema } from "@/types/event";
 import { authMiddleware } from "@/utils/authMiddleware";
+import { deleteEventImage } from "@/utils/uploads";
 import {
   db,
   eq,
@@ -16,12 +17,16 @@ export const DELETE = authMiddleware({
     const id = params.id as string;
 
     try {
-      await db.batch([
+      const results = await db.batch([
         db.delete(eventParticipants).where(eq(eventParticipants.eventId, id)),
         db.delete(eventPresenters).where(eq(eventPresenters.eventId, id)),
         db.delete(certificate).where(eq(certificate.eventId, id)),
-        db.delete(event).where(eq(event.id, id)),
+        db.delete(event).where(eq(event.id, id)).returning(),
       ]);
+
+      deleteEventImage({
+        url: results[3][0].image,
+      });
 
       return new Response(
         JSON.stringify({
