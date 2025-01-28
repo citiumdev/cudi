@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { User } from "@/types/user";
+import { UserIcon } from "lucide-react";
 
 interface Props {
   user: User | null;
@@ -18,9 +19,11 @@ export default function UserDropdown({ user }: Props) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
-        <Avatar className="size-12">
+        <Avatar className="size-11">
           <AvatarImage src={user?.image} />
-          <AvatarFallback className="bg-primary font-bold">CN</AvatarFallback>
+          <AvatarFallback className="bg-primary font-bold">
+            {user?.name?.[0] || <UserIcon className="size-5" />}
+          </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent side="bottom" align="end" className="w-40">
