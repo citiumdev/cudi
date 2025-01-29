@@ -7,6 +7,7 @@ export const eventSchema = z.object({
   date: z.number(),
   duration: z.number(),
   done: z.boolean(),
+  limit: z.number().min(0).nullable(),
 });
 
 export type Event = z.infer<typeof eventSchema>;

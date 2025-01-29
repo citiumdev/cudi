@@ -1,7 +1,7 @@
 import type { User } from "@/types/user";
 import type { Event } from "@/types/event";
 import { Button } from "../ui/button";
-import { Calendar, Clock, Pencil } from "lucide-react";
+import { Calendar, Clock, Pencil, Users } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
@@ -98,6 +98,14 @@ export default function EventCard({
         <div className="flex items-center gap-2 text-neutral-400">
           <Calendar className="h-4 w-4" />
           <span className="text-sm">{parsedDate}</span>
+        </div>
+        <div className="flex items-center gap-2 text-neutral-400">
+          <Users className="h-4 w-4" />
+          <span className="text-sm">
+            {event.limit
+              ? `Hasta ${event.limit} participantes`
+              : "Sin límite de participantes"}
+          </span>
         </div>
         <div className="flex items-center gap-2 text-neutral-400">
           <Clock className="h-4 w-4" />

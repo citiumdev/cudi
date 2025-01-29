@@ -5,6 +5,7 @@ import {
   count,
   db,
   eq,
+  event,
   eventParticipants,
   user,
 } from "astro:db";
@@ -65,20 +66,69 @@ export const GET = authMiddleware({
 export const POST = authMiddleware({
   admin: false,
   handler: async ({ request, params }) => {
-    const session = await getSession(request);
-
-    if (!session?.user) {
-      return new Response(JSON.stringify({ message: "Unauthorized" }), {
-        status: 401,
-        headers: {
-          "content-type": "application/json",
-        },
-      });
-    }
-
-    const id = params.id as string;
-
     try {
+      const session = await getSession(request);
+
+      if (!session?.user) {
+        return new Response(JSON.stringify({ message: "Unauthorized" }), {
+          status: 401,
+          headers: {
+            "content-type": "application/json",
+          },
+        });
+      }
+
+      const id = params.id as string;
+
+      const currentEvent = await db
+        .select()
+        .from(event)
+        .where(eq(event.id, id))
+        .get();
+
+      if (!currentEvent) {
+        return new Response(JSON.stringify({ message: "Event not found" }), {
+          status: 404,
+          headers: {
+            "content-type": "application/json",
+          },
+        });
+      }
+
+      const currentParticipants = await db
+        .select({ count: count(), participant: eventParticipants })
+        .from(eventParticipants)
+        .where(eq(eventParticipants.eventId, id));
+
+      if (
+        currentEvent.limit &&
+        currentParticipants.length &&
+        currentParticipants[0].count >= currentEvent.limit
+      ) {
+        return new Response(JSON.stringify({ message: "Event is full" }), {
+          status: 400,
+          headers: {
+            "content-type": "application/json",
+          },
+        });
+      }
+
+      if (
+        currentParticipants.some(
+          ({ participant }) => participant.userId === session?.user?.id,
+        )
+      ) {
+        return new Response(
+          JSON.stringify({ message: "Already participant" }),
+          {
+            status: 400,
+            headers: {
+              "content-type": "application/json",
+            },
+          },
+        );
+      }
+
       await db.insert(eventParticipants).values({
         userId: session.user.id,
         eventId: id,

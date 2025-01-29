@@ -63,6 +63,7 @@ export const PUT = authMiddleware({
         name: true,
         date: true,
         duration: true,
+        limit: true,
       })
       .extend({
         presenters: z.string().email().array(),
@@ -95,6 +96,7 @@ export const PUT = authMiddleware({
           name: data.name,
           date: data.date,
           duration: data.duration,
+          limit: data.limit,
         })
         .where(eq(event.id, id));
 

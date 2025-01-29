@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -36,6 +37,7 @@ const formSchema = z.object({
   name: z.string().min(1, "El nombre es requerido"),
   date: z.coerce.date(),
   duration: z.number().min(1).max(5),
+  limit: z.coerce.number().min(0),
   presenters: z
     .array(z.string())
     .nonempty("Al menos un presentador es requerido"),
@@ -60,6 +62,7 @@ export default function EditEventForm({
       name: event.name,
       date: new Date(event.date),
       duration: event.duration,
+      limit: event.limit || 0,
       presenters: presenters.map((presenter) => presenter.email),
     },
   });
@@ -76,6 +79,7 @@ export default function EditEventForm({
         date: values.date.toISOString(),
         duration: values.duration,
         presenters: values.presenters,
+        limit: values.limit,
       }),
     });
 
@@ -203,6 +207,23 @@ export default function EditEventForm({
                     />
                   </FormControl>
 
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="limit"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Participantes</FormLabel>
+                  <FormControl>
+                    <Input {...field} type="number" />
+                  </FormControl>
+                  <FormDescription>
+                    Dejar en 0 para no limitar participantes
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

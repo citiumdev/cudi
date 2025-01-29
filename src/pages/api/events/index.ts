@@ -9,6 +9,7 @@ const postSchema = z.object({
   image: z.instanceof(File),
   date: z.string(),
   duration: z.coerce.number(),
+  limit: z.coerce.number().min(0).nullish(),
   presenters: z.string().transform((value) => value.slice(2, -2).split(",")),
 });
 
@@ -48,6 +49,7 @@ export const POST = authMiddleware({
           image: url,
           date: new Date(parsedBody.date).valueOf(),
           duration: parsedBody.duration,
+          limit: parsedBody.limit,
         })
         .returning()
         .get();

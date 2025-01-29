@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -37,6 +38,7 @@ const formSchema = z.object({
   image: z.array(z.instanceof(File)).length(1, "La imagen es requerida"),
   date: z.coerce.date(),
   duration: z.number().min(1).max(5),
+  limit: z.coerce.number().min(0),
   presenters: z
     .array(z.string())
     .nonempty("Al menos un presentador es requerido"),
@@ -64,6 +66,7 @@ export default function CreateEventsForm({ presentersOptions }: Props) {
       image: [],
       date: new Date(),
       duration: 4,
+      limit: 0,
       presenters: [],
     },
   });
@@ -75,6 +78,7 @@ export default function CreateEventsForm({ presentersOptions }: Props) {
     formData.append("date", values.date.toISOString());
     formData.append("duration", values.duration.toString());
     formData.append("presenters", JSON.stringify(values.presenters));
+    formData.append("limit", values.limit.toString());
 
     const response = await fetch("/api/events", {
       method: "POST",
@@ -206,6 +210,23 @@ export default function CreateEventsForm({ presentersOptions }: Props) {
                 />
               </FormControl>
 
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="limit"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Participantes</FormLabel>
+              <FormControl>
+                <Input {...field} type="number" />
+              </FormControl>
+              <FormDescription>
+                Dejar en 0 para no limitar participantes
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
