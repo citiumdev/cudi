@@ -1,0 +1,58 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Logo from "@/components/svg/logo.astro";
+import { buttonVariants } from "@/components/ui/button";
+import { Github } from "lucide-react";
+import { providersMap } from "../../auth.config.ts";
+
+const url = Astro.url;
+const redirect = url.searchParams.get("callbackUrl") || "/";
+---
+
+<Layout>
+  <main class="flex min-h-screen w-full items-center justify-center">
+    <div
+      class="absolute top-0 z-[-2] h-screen w-full bg-background bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(140,82,255,0.3),rgba(255,255,255,0))]"
+    >
+    </div>
+
+    <div
+      class="flex w-[400px] flex-col items-center rounded-md border bg-neutral-950 px-8 py-10"
+    >
+      <Logo class="size-20 fill-white" />
+      <h1 class="mt-2 text-2xl font-bold">Iniciar Sesión</h1>
+      <div class="mt-8 flex w-full flex-col">
+        {
+          providersMap.map((provider) => (
+            <button
+              class={buttonVariants({ variant: "outline" })}
+              data-provider={provider.id}
+              data-redirect={redirect}
+            >
+              <Github />
+              <span>{provider.name}</span>
+            </button>
+          ))
+        }
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<script>
+  import { signIn } from "auth-astro/client";
+
+  const buttons = document.querySelectorAll("button");
+
+  buttons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const provider = button.dataset.provider as string;
+      const redirect = button.dataset.redirect as string;
+
+      signIn(provider, {
+        // @ts-ignore
+        callbackUrl: redirect,
+      });
+    });
+  });
+</script>
