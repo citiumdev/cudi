@@ -10,7 +10,7 @@ import { userSchema } from "@/types/user";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { z } from "zod";
 import { Button } from "../ui/button";
-import { BookCheck, Ellipsis } from "lucide-react";
+import { BookCheck, Ellipsis, UserCheck } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import {
@@ -40,6 +40,7 @@ const schema = createPaginationSchema(
 export default function EventParticipants({ event }: Props) {
   const { toast } = useToast();
   const [isDone, setIsDone] = useState(event.done);
+  const [isActive, setIsActive] = useState(event.active);
 
   const { data, status, refetch } = useInfiniteQuery(
     {
@@ -84,19 +85,51 @@ export default function EventParticipants({ event }: Props) {
     }
   };
 
+  const handleActive = async () => {
+    const res = await fetch(`/api/events/${event.id}/active`, {
+      method: "POST",
+    });
+
+    if (res.ok) {
+      refetch();
+      toast({
+        title: "Evento activado",
+        description:
+          "Se ha habilitado el evento para que los participantes puedan ingresar",
+      });
+      setIsActive(true);
+    } else {
+      toast({
+        title: "Error",
+        description: "Ocurrió un error al activar el evento",
+      });
+    }
+  };
+
   return (
     <div className="mt-8 flex w-full flex-col">
       <div className="flex items-center justify-between">
         <h2 className="mb-4 text-2xl font-bold">Participantes</h2>
-        <Button
-          size="sm"
-          variant="outline"
-          disabled={isDone}
-          onClick={() => handleDone()}
-        >
-          Terminar Evento
-          <BookCheck />
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={isActive}
+            onClick={() => handleActive()}
+          >
+            Activar Evento
+            <UserCheck />
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={!isActive || isDone}
+            onClick={() => handleDone()}
+          >
+            Terminar Evento
+            <BookCheck />
+          </Button>
+        </div>
       </div>
       {status === "pending" ? (
         <div className="border p-6 text-center text-sm">Cargando...</div>

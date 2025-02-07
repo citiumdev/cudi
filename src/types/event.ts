@@ -7,6 +7,7 @@ export const eventSchema = z.object({
   date: z.number(),
   duration: z.number(),
   done: z.boolean(),
+  active: z.boolean(),
   limit: z.number().min(0).nullable(),
 });
 

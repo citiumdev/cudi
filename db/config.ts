@@ -67,6 +67,7 @@ const event = defineTable({
     date: c.number(),
     duration: c.number(),
     done: c.boolean({ default: false }),
+    active: c.boolean({ default: false }),
     limit: c.number({
       optional: true,
     }),

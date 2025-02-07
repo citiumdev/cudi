@@ -15,6 +15,45 @@ export const POST = authMiddleware({
     const id = params.id as string;
 
     try {
+      const currentEvent = await db
+        .select()
+        .from(event)
+        .where(eq(event.id, id))
+        .get();
+
+      if (!currentEvent) {
+        return new Response(JSON.stringify({ message: "Event not found" }), {
+          status: 404,
+          headers: {
+            "content-type": "application/json",
+          },
+        });
+      }
+
+      if (currentEvent.done) {
+        return new Response(
+          JSON.stringify({ message: "Event already marked as done" }),
+          {
+            status: 400,
+            headers: {
+              "content-type": "application/json",
+            },
+          },
+        );
+      }
+
+      if (!currentEvent.active) {
+        return new Response(
+          JSON.stringify({ message: "Event is not active" }),
+          {
+            status: 400,
+            headers: {
+              "content-type": "application/json",
+            },
+          },
+        );
+      }
+
       const participantsWithoutCertificate = await db
         .select({ eventParticipants })
         .from(eventParticipants)

@@ -134,20 +134,24 @@ export default function EventCard({
             <p className="text-sm text-neutral-400">
               {event.done
                 ? "El evento ya se realizó"
-                : isRegistered
-                  ? "Ya estás inscrito"
-                  : "Inscríbete en este evento"}
+                : event.active
+                  ? isRegistered
+                    ? "Ya estás inscrito"
+                    : "Inscríbete en este evento"
+                  : "Aún no disponible"}
             </p>
             <Button
-              disabled={event.done}
+              disabled={event.done || !event.active}
               onClick={isRegistered ? handleUnregister : handleRegister}
               variant={isRegistered && !event.done ? "destructive" : "default"}
             >
               {event.done
                 ? "Evento realizado"
-                : isRegistered
-                  ? "Darse de baja"
-                  : "Inscribirse"}
+                : event.active
+                  ? isRegistered
+                    ? "Darse de baja"
+                    : "Inscribirse"
+                  : "Evento no activo"}
             </Button>
           </div>
         </div>
