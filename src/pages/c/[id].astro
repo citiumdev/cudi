@@ -1,5 +1,6 @@
 ---
 import Layout from "@/layouts/Layout.astro";
+import Gradient from "@/components/Gradient.tsx";
 import CertificatePage from "@/components/certificate/CertificatePage.tsx";
 
 import { db, user, event, eq, certificate } from "astro:db";
@@ -27,7 +28,7 @@ const result = certificateSchema.safeParse(rows);
       <CertificatePage certificate={result.data} />
     ) : (
       <main class="flex h-screen items-center justify-center">
-        <div class="absolute top-0 z-[-2] h-screen w-full bg-background bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(140,82,255,0.3),rgba(255,255,255,0))]" />
+        <Gradient />
         <h1 class="text-2xl font-bold">El certificado no existe</h1>
       </main>
     )

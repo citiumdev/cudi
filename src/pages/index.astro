@@ -9,14 +9,12 @@ import Footer from "@/components/sections/Footer.astro";
 
 import PointerGradient from "@/components/PointerGradient.tsx";
 import { Toaster } from "@/components/ui/toaster.tsx";
+import Gradient from "@/components/Gradient.tsx";
 ---
 
 <Layout>
   <main>
-    <div
-      class="absolute top-0 z-[-2] h-screen w-full bg-background bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(140,82,255,0.3),rgba(255,255,255,0))]"
-    >
-    </div>
+    <Gradient />
     <Navbar />
     <Hero />
     <About />

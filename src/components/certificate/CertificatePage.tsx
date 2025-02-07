@@ -1,6 +1,7 @@
 import { type Certificate } from "@/types/certificate";
 import { Calendar, Clock, Download, GraduationCap, User } from "lucide-react";
 import { Button } from "../ui/button";
+import Gradient from "@/components/Gradient.tsx";
 
 interface Props {
   certificate: Certificate;
@@ -23,7 +24,7 @@ export default function CertificatePageCard({ certificate }: Props) {
 
   return (
     <main>
-      <div className="absolute top-0 z-[-2] h-screen w-full bg-background bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(140,82,255,0.3),rgba(255,255,255,0))]" />
+      <Gradient />
 
       <div className="container mx-auto flex min-h-screen w-full max-w-4xl items-center overflow-y-auto">
         <div className="flex w-full flex-col gap-4 p-4">

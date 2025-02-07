@@ -70,7 +70,7 @@ export default function EventCard({
   };
 
   return (
-    <div className="relative overflow-hidden rounded-lg border bg-white shadow-md dark:bg-neutral-900">
+    <div className="relative flex flex-col overflow-hidden rounded-lg border bg-white shadow-md dark:bg-neutral-900">
       {currentUserIsAdmin ? (
         <Button
           variant="secondary"
@@ -91,7 +91,7 @@ export default function EventCard({
           className="absolute h-full w-full object-cover"
         />
       </div>
-      <div className="flex flex-col gap-2 p-4">
+      <div className="flex flex-1 flex-col gap-2 p-4">
         <h2 className="text-xl font-bold text-neutral-800 dark:text-neutral-100">
           {event.name}
         </h2>
@@ -111,7 +111,7 @@ export default function EventCard({
           <Clock className="h-4 w-4" />
           <span className="text-sm">{event.duration} horas</span>
         </div>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-1 flex-col gap-2">
           <h3 className="font-bold text-neutral-800 dark:text-neutral-100">
             Presentadores
           </h3>
@@ -130,7 +130,7 @@ export default function EventCard({
             ))}
           </div>
 
-          <div className="mt-4 flex w-full flex-col gap-2">
+          <div className="mt-auto flex w-full flex-col gap-2 pt-4">
             <p className="text-sm text-neutral-400">
               {event.done
                 ? "El evento ya se realizó"
