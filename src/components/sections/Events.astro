@@ -1,3 +1,14 @@
+---
+import EventCard from "@/components/EventCard.tsx";
+import { db, event, desc } from "astro:db";
+
+const events = await db
+  .select()
+  .from(event)
+  .orderBy(event.done, desc(event.active), event.date)
+  .limit(3);
+---
+
 <section
   id="events"
   class="container mx-auto mb-40 flex min-h-screen max-w-6xl items-center px-2 py-32"
@@ -13,10 +24,24 @@
       a continuación y únete a nosotros en nuestras próximas actividades. ¡Te
       esperamos!
     </p>
-    <div
-      class="mt-4 flex h-96 items-center justify-center rounded-lg bg-chetwode-500/10 p-4"
-    >
-      <h2 class="text-2xl font-bold">Proximamente... ;)</h2>
-    </div>
+    {
+      events.length ? (
+        <div class="mt-4 grid flex-1 grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {events.map((e) => (
+            <EventCard event={e} />
+          ))}
+          <a
+            href="/dashboard"
+            class="flex h-full w-full items-center justify-center rounded-md bg-neutral-900 px-4 py-6 text-neutral-100 transition-all hover:bg-neutral-800/70"
+          >
+            <span class="text-sm font-bold">Ver todos los eventos</span>
+          </a>
+        </div>
+      ) : (
+        <div class="mt-4 flex h-96 items-center justify-center rounded-lg bg-chetwode-500/10 p-4">
+          <h2 class="text-2xl font-bold">Proximamente... ;)</h2>
+        </div>
+      )
+    }
   </div>
 </section>
