@@ -71,6 +71,9 @@ const event = defineTable({
     limit: c.number({
       optional: true,
     }),
+    type: c.text({
+      default: "workshop", // workshop, talk
+    }),
   },
 });
 

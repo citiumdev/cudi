@@ -54,29 +54,35 @@ export const POST = authMiddleware({
         );
       }
 
-      const participantsWithoutCertificate = await db
-        .select({ eventParticipants })
-        .from(eventParticipants)
-        .leftJoin(
-          certificate,
-          and(
-            eq(certificate.userId, eventParticipants.userId),
-            eq(certificate.eventId, eventParticipants.eventId),
-          ),
-        )
-        .where(and(eq(eventParticipants.eventId, id), isNull(certificate.id)));
+      if (currentEvent.type === "workshop") {
+        const participantsWithoutCertificate = await db
+          .select({ eventParticipants })
+          .from(eventParticipants)
+          .leftJoin(
+            certificate,
+            and(
+              eq(certificate.userId, eventParticipants.userId),
+              eq(certificate.eventId, eventParticipants.eventId),
+            ),
+          )
+          .where(
+            and(eq(eventParticipants.eventId, id), isNull(certificate.id)),
+          );
 
-      await db.batch([
-        db.update(event).set({ done: true }).where(eq(event.id, id)),
-        db.insert(certificate).values(
-          participantsWithoutCertificate.map(
-            ({ eventParticipants: { userId, eventId } }) => ({
-              userId,
-              eventId,
-            }),
+        await db.batch([
+          db.update(event).set({ done: true }).where(eq(event.id, id)),
+          db.insert(certificate).values(
+            participantsWithoutCertificate.map(
+              ({ eventParticipants: { userId, eventId } }) => ({
+                userId,
+                eventId,
+              }),
+            ),
           ),
-        ),
-      ]);
+        ]);
+      } else {
+        await db.update(event).set({ done: true }).where(eq(event.id, id));
+      }
 
       return new Response(
         JSON.stringify({

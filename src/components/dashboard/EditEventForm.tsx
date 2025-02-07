@@ -33,15 +33,24 @@ import {
 } from "../ui/dropdown-menu";
 import { Ellipsis } from "lucide-react";
 
-const formSchema = z.object({
-  name: z.string().min(1, "El nombre es requerido"),
-  date: z.coerce.date(),
-  duration: z.number().min(1).max(5),
-  limit: z.coerce.number().min(0),
-  presenters: z
-    .array(z.string())
-    .nonempty("Al menos un presentador es requerido"),
-});
+const formSchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("workshop"),
+    name: z.string().min(1, "El nombre es requerido"),
+    date: z.coerce.date(),
+    duration: z.number().min(1).max(5),
+    limit: z.coerce.number().min(0),
+    presenters: z
+      .array(z.string())
+      .nonempty("Al menos un presentador es requerido"),
+  }),
+  z.object({
+    type: z.literal("talk"),
+    name: z.string().min(1, "El nombre es requerido"),
+    date: z.coerce.date(),
+    duration: z.number().min(1).max(5),
+  }),
+]);
 
 interface Props {
   event: Event;
@@ -59,6 +68,7 @@ export default function EditEventForm({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      type: event.type,
       name: event.name,
       date: new Date(event.date),
       duration: event.duration,
@@ -78,8 +88,8 @@ export default function EditEventForm({
         name: values.name,
         date: values.date.toISOString(),
         duration: values.duration,
-        presenters: values.presenters,
-        limit: values.limit,
+        presenters: values.type === "workshop" ? values.presenters : [],
+        limit: values.type === "workshop" ? values.limit : 0,
       }),
     });
 
@@ -212,57 +222,61 @@ export default function EditEventForm({
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="limit"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Participantes</FormLabel>
-                  <FormControl>
-                    <Input {...field} type="number" />
-                  </FormControl>
-                  <FormDescription>
-                    Dejar en 0 para no limitar participantes
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {event.type === "workshop" ? (
+              <>
+                <FormField
+                  control={form.control}
+                  name="limit"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Participantes</FormLabel>
+                      <FormControl>
+                        <Input {...field} type="number" />
+                      </FormControl>
+                      <FormDescription>
+                        Dejar en 0 para no limitar participantes
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <FormField
-              control={form.control}
-              name="presenters"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Presentadores</FormLabel>
-                  <FormControl>
-                    <MultiSelector
-                      values={field.value}
-                      onValuesChange={field.onChange}
-                      loop
-                    >
-                      <MultiSelectorTrigger>
-                        <MultiSelectorInput placeholder="Selecciona a los presentadores" />
-                      </MultiSelectorTrigger>
-                      <MultiSelectorContent>
-                        <MultiSelectorList>
-                          {presentersOptions.map((presenter) => (
-                            <MultiSelectorItem
-                              key={presenter.id}
-                              value={presenter.email}
-                            >
-                              {presenter.email}
-                            </MultiSelectorItem>
-                          ))}
-                        </MultiSelectorList>
-                      </MultiSelectorContent>
-                    </MultiSelector>
-                  </FormControl>
+                <FormField
+                  control={form.control}
+                  name="presenters"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Presentadores</FormLabel>
+                      <FormControl>
+                        <MultiSelector
+                          values={field.value}
+                          onValuesChange={field.onChange}
+                          loop
+                        >
+                          <MultiSelectorTrigger>
+                            <MultiSelectorInput placeholder="Selecciona a los presentadores" />
+                          </MultiSelectorTrigger>
+                          <MultiSelectorContent>
+                            <MultiSelectorList>
+                              {presentersOptions.map((presenter) => (
+                                <MultiSelectorItem
+                                  key={presenter.id}
+                                  value={presenter.email}
+                                >
+                                  {presenter.email}
+                                </MultiSelectorItem>
+                              ))}
+                            </MultiSelectorList>
+                          </MultiSelectorContent>
+                        </MultiSelector>
+                      </FormControl>
 
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            ) : null}
 
             <Button
               type="submit"

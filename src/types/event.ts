@@ -9,6 +9,7 @@ export const eventSchema = z.object({
   done: z.boolean(),
   active: z.boolean(),
   limit: z.number().min(0).nullable(),
+  type: z.enum(["workshop", "talk"]),
 });
 
 export type Event = z.infer<typeof eventSchema>;

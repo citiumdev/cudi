@@ -30,8 +30,8 @@ const rows = await db
   })
   .from(event)
   .leftJoin(eventParticipants, eq(event.id, eventParticipants.eventId))
-  .innerJoin(eventPresenters, eq(event.id, eventPresenters.eventId))
-  .innerJoin(presenter, eq(presenter.id, eventPresenters.userId))
+  .leftJoin(eventPresenters, eq(event.id, eventPresenters.eventId))
+  .leftJoin(presenter, eq(presenter.id, eventPresenters.userId))
   .where(eq(event.done, false))
   .all();
 
@@ -52,7 +52,9 @@ const result = rows.reduce<
     acc[rowEvent.id] = { event: rowEvent, presenters: [], participantsId: [] };
   }
 
-  acc[rowEvent.id].presenters.push(rowPresenter);
+  if (rowPresenter) {
+    acc[rowEvent.id].presenters.push(rowPresenter);
+  }
 
   if (rowParticipant) {
     acc[rowEvent.id].participantsId.push(rowParticipant.userId);

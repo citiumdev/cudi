@@ -50,8 +50,13 @@ const items = [
 
 const adminItems = [
   {
-    title: "Crear Eventos",
-    url: "/events/new",
+    title: "Crear Taller",
+    url: "/events/new/workshop",
+    icon: CalendarPlus,
+  },
+  {
+    title: "Crear Charla",
+    url: "/events/new/talk",
     icon: CalendarPlus,
   },
 ];
@@ -143,9 +148,7 @@ export default function DashboardSidebar({ user, children }: Props) {
           <Separator orientation="vertical" className="mr-2 h-4" />
           <h1 className="text-lg font-bold">Panel</h1>
         </header>
-        <div className="flex flex-1 flex-col gap-4 p-8">
-          {children}
-        </div>
+        <div className="flex flex-1 flex-col gap-4 p-8">{children}</div>
       </SidebarInset>
     </SidebarProvider>
   );

@@ -95,6 +95,27 @@ export const POST = authMiddleware({
         });
       }
 
+      if (!currentEvent.active) {
+        return new Response(
+          JSON.stringify({ message: "Event is not active" }),
+          {
+            status: 400,
+            headers: {
+              "content-type": "application/json",
+            },
+          },
+        );
+      }
+
+      if (currentEvent.done) {
+        return new Response(JSON.stringify({ message: "Event is done" }), {
+          status: 400,
+          headers: {
+            "content-type": "application/json",
+          },
+        });
+      }
+
       const currentParticipants = await db
         .select({ count: count(), participant: eventParticipants })
         .from(eventParticipants)

@@ -112,23 +112,27 @@ export default function EventCard({
           <span className="text-sm">{event.duration} horas</span>
         </div>
         <div className="flex flex-1 flex-col gap-2">
-          <h3 className="font-bold text-neutral-800 dark:text-neutral-100">
-            Presentadores
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {[...presenters].map((presenter) => (
-              <div
-                key={presenter.id}
-                className="flex items-center gap-2 rounded-full bg-neutral-800 p-1 pr-2"
-              >
-                <Avatar className="size-6">
-                  <AvatarImage src={presenter.image} />
-                  <AvatarFallback>{presenter.name[0]}</AvatarFallback>
-                </Avatar>
-                <span className="text-xs font-bold">{presenter.name}</span>
+          {event.type === "workshop" ? (
+            <>
+              <h3 className="font-bold text-neutral-800 dark:text-neutral-100">
+                Presentadores
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {[...presenters].map((presenter) => (
+                  <div
+                    key={presenter.id}
+                    className="flex items-center gap-2 rounded-full bg-neutral-800 p-1 pr-2"
+                  >
+                    <Avatar className="size-6">
+                      <AvatarImage src={presenter.image} />
+                      <AvatarFallback>{presenter.name[0]}</AvatarFallback>
+                    </Avatar>
+                    <span className="text-xs font-bold">{presenter.name}</span>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </>
+          ) : null}
 
           <div className="mt-auto flex w-full flex-col gap-2 pt-4">
             <p className="text-sm text-neutral-400">

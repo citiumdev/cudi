@@ -48,7 +48,7 @@ interface Props {
   presentersOptions: User[];
 }
 
-export default function CreateEventsForm({ presentersOptions }: Props) {
+export default function CreateWorkshopForm({ presentersOptions }: Props) {
   const dropZoneConfig: DropzoneOptions = {
     accept: {
       "image/*": [".jpg", ".jpeg", ".png"],
@@ -108,7 +108,7 @@ export default function CreateEventsForm({ presentersOptions }: Props) {
         className="container mx-auto max-w-xl space-y-8"
         autoComplete="off"
       >
-        <h1 className="text-3xl font-bold">Crear Evento</h1>
+        <h1 className="text-3xl font-bold">Crear Taller</h1>
         <FormField
           control={form.control}
           name="name"

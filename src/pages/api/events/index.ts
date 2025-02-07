@@ -4,14 +4,24 @@ import { db, event, eventPresenters, inArray, user } from "astro:db";
 import { authMiddleware } from "@/utils/authMiddleware";
 import { uploadEventImage } from "@/utils/uploads";
 
-const postSchema = z.object({
-  name: z.string(),
-  image: z.instanceof(File),
-  date: z.string(),
-  duration: z.coerce.number(),
-  limit: z.coerce.number().min(0).nullish(),
-  presenters: z.string().transform((value) => value.slice(2, -2).split(",")),
-});
+const postSchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("workshop"),
+    name: z.string(),
+    image: z.instanceof(File),
+    date: z.string(),
+    duration: z.coerce.number(),
+    limit: z.coerce.number().min(0).nullish(),
+    presenters: z.string().transform((value) => value.slice(2, -2).split(",")),
+  }),
+  z.object({
+    type: z.literal("talk"),
+    name: z.string(),
+    image: z.instanceof(File),
+    date: z.string(),
+    duration: z.coerce.number(),
+  }),
+]);
 
 export const POST = authMiddleware({
   admin: true,
@@ -49,28 +59,44 @@ export const POST = authMiddleware({
           image: url,
           date: new Date(parsedBody.date).valueOf(),
           duration: parsedBody.duration,
-          limit: parsedBody.limit,
+          limit: parsedBody.type === "workshop" ? parsedBody.limit : 0,
+          type: parsedBody.type,
         })
         .returning()
         .get();
 
-      const presentersResult = await db
-        .select()
-        .from(user)
-        .where(inArray(user.email, parsedBody.presenters));
+      if (parsedBody.type === "workshop") {
+        const presentersResult = await db
+          .select()
+          .from(user)
+          .where(inArray(user.email, parsedBody.presenters));
 
-      presentersResult.forEach(async (presenter) => {
-        await db.insert(eventPresenters).values({
-          eventId: eventResult.id,
-          userId: presenter.id,
-        });
-      });
+        await db.insert(eventPresenters).values(
+          presentersResult.map((presenter) => ({
+            eventId: eventResult.id,
+            userId: presenter.id,
+          })),
+        );
+
+        return new Response(
+          JSON.stringify({
+            data: {
+              event: eventResult,
+              presenters: presentersResult,
+            },
+          }),
+          {
+            headers: {
+              "content-type": "application/json",
+            },
+          },
+        );
+      }
 
       return new Response(
         JSON.stringify({
           data: {
             event: eventResult,
-            presenters: presentersResult,
           },
         }),
         {
