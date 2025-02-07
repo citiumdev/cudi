@@ -1,5 +1,6 @@
 ---
 import EventCard from "@/components/EventCard.tsx";
+import { eventSchema } from "@/types/event";
 import { db, event, desc } from "astro:db";
 
 const events = await db
@@ -7,6 +8,9 @@ const events = await db
   .from(event)
   .orderBy(event.done, desc(event.active), event.date)
   .limit(3);
+
+const result = eventSchema.array().safeParse(events);
+const parsed = result.success ? result.data : [];
 ---
 
 <section
@@ -27,7 +31,7 @@ const events = await db
     {
       events.length ? (
         <div class="mt-4 grid flex-1 grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {events.map((e) => (
+          {parsed.map((e) => (
             <EventCard event={e} />
           ))}
           <a
