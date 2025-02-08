@@ -2,7 +2,15 @@
 import DashboardLayout from "@/layouts/DashboardLayout.astro";
 import CertificateCard from "@/components/dashboard/CertificateCard.tsx";
 
-import { db, user, event, eq, certificate } from "astro:db";
+import {
+  db,
+  user,
+  event,
+  eq,
+  certificate,
+  alias,
+  eventPresenters,
+} from "astro:db";
 import { certificateSchema } from "@/types/certificate";
 import { getSession } from "auth-astro/server";
 
@@ -11,19 +19,58 @@ import type { User } from "@/types/user";
 const session = await getSession(Astro.request);
 const sessionUser = session?.user as User;
 
+const presenter = alias(user, "presenter");
+
 const rows = await db
   .select({
     id: certificate.id,
     event,
     user,
+    presenter,
   })
   .from(certificate)
   .innerJoin(event, eq(event.id, certificate.eventId))
   .innerJoin(user, eq(user.id, certificate.userId))
+  .leftJoin(eventPresenters, eq(event.id, eventPresenters.eventId))
+  .leftJoin(presenter, eq(presenter.id, eventPresenters.userId))
   .where(eq(certificate.userId, sessionUser.id))
   .all();
 
-const certificates = certificateSchema.array().parse(rows);
+type DBEvent = typeof event.$inferSelect;
+type DBUser = typeof user.$inferSelect;
+
+const result = rows.reduce<
+  Record<
+    string,
+    {
+      id: string;
+      event: DBEvent;
+      user: DBUser;
+      presenters: DBUser[];
+    }
+  >
+>((acc, row) => {
+  const rowEvent = row.event;
+  const rowUser = row.user;
+  const rowPresenter = row.presenter;
+
+  if (!acc[row.id]) {
+    acc[row.id] = {
+      event: rowEvent,
+      presenters: [],
+      user: rowUser,
+      id: row.id,
+    };
+  }
+
+  if (rowPresenter) {
+    acc[row.id].presenters.push(rowPresenter);
+  }
+
+  return acc;
+}, {});
+
+const certificates = certificateSchema.array().parse(Object.values(result));
 ---
 
 <DashboardLayout>

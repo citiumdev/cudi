@@ -3,6 +3,9 @@ export default {
   darkMode: ["class"],
   content: ["./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}"],
   theme: {
+    fontFamily: {
+      sans: ["Roboto Flex Variable", "ui-sans-serif", "system-ui"],
+    },
     extend: {
       borderRadius: {
         lg: "var(--radius)",

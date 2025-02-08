@@ -2,12 +2,15 @@ import { type Certificate } from "@/types/certificate";
 import { Calendar, Clock, Download, GraduationCap, User } from "lucide-react";
 import { Button } from "../ui/button";
 import Gradient from "@/components/Gradient.tsx";
+import useCertificate from "@/hooks/useCertificate";
 
 interface Props {
   certificate: Certificate;
 }
 
 export default function CertificatePageCard({ certificate }: Props) {
+  const { image, download } = useCertificate(certificate);
+
   const parsedDate = new Date(certificate.event.date).toLocaleDateString(
     "es-ES",
     {
@@ -19,8 +22,6 @@ export default function CertificatePageCard({ certificate }: Props) {
       hourCycle: "h12",
     },
   );
-
-  const certificateUrl = `/api/certificates/${certificate.id}`;
 
   return (
     <main>
@@ -52,13 +53,11 @@ export default function CertificatePageCard({ certificate }: Props) {
           </div>
 
           <div className="aspect-[2000/1414] w-full bg-neutral-800 p-2">
-            <img src={certificateUrl} />
+            {image ? <img src={image} alt="Certificado" /> : null}
           </div>
 
-          <Button asChild variant="outline">
-            <a href={certificateUrl + "?pdf=true"} download>
-              Descargar <Download className="h-4 w-4" />
-            </a>
+          <Button variant="outline" onClick={download}>
+            Descargar <Download className="h-4 w-4" />
           </Button>
         </div>
       </div>

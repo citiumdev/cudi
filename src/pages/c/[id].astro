@@ -2,30 +2,73 @@
 import Layout from "@/layouts/Layout.astro";
 import Gradient from "@/components/Gradient.tsx";
 import CertificatePage from "@/components/certificate/CertificatePage.tsx";
-
-import { db, user, event, eq, certificate } from "astro:db";
+import {
+  db,
+  user,
+  event,
+  eq,
+  certificate,
+  alias,
+  eventPresenters,
+} from "astro:db";
 const { id } = Astro.params;
 import { certificateSchema } from "@/types/certificate";
+
+const presenter = alias(user, "presenter");
 
 const rows = await db
   .select({
     id: certificate.id,
     event,
     user,
+    presenter,
   })
   .from(certificate)
   .innerJoin(event, eq(event.id, certificate.eventId))
   .innerJoin(user, eq(user.id, certificate.userId))
-  .where(eq(certificate.id, id as string))
-  .get();
+  .leftJoin(eventPresenters, eq(event.id, eventPresenters.eventId))
+  .leftJoin(presenter, eq(presenter.id, eventPresenters.userId))
+  .where(eq(certificate.id, id as string));
 
-const result = certificateSchema.safeParse(rows);
+type DBEvent = typeof event.$inferSelect;
+type DBUser = typeof user.$inferSelect;
+
+const result = rows.reduce<
+  | {
+      id: string;
+      event: DBEvent;
+      user: DBUser;
+      presenters: DBUser[];
+    }
+  | undefined
+>((acc, row) => {
+  const rowEvent = row.event;
+  const rowUser = row.user;
+  const rowPresenter = row.presenter;
+
+  if (!acc) {
+    acc = {
+      event: rowEvent,
+      presenters: [],
+      user: rowUser,
+      id: row.id,
+    };
+  }
+
+  if (rowPresenter) {
+    acc.presenters.push(rowPresenter);
+  }
+
+  return acc;
+}, undefined);
+
+const parsed = certificateSchema.safeParse(result);
 ---
 
 <Layout>
   {
-    result.success ? (
-      <CertificatePage certificate={result.data} />
+    parsed.success ? (
+      <CertificatePage certificate={parsed.data} client:load />
     ) : (
       <main class="flex h-screen items-center justify-center">
         <Gradient />
