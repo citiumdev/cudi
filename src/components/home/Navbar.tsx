@@ -1,6 +1,11 @@
+import { getServerSession } from "next-auth";
 import Logo from "../svg/Logo";
+import UserDropdown from "./UserDropdown";
+import NavbarMenu from "./NavBarMenu";
 
-export default function Navbar() {
+export default async function Navbar() {
+  const session = await getServerSession();
+
   return (
     <nav className="fixed left-0 top-0 z-10 flex w-full">
       <div className="container mx-auto hidden w-full items-center gap-4 px-6 py-4 sm:flex">
@@ -34,11 +39,11 @@ export default function Navbar() {
             </a>
           </div>
         </div>
-        {/* <UserDropdown user={session?.user || null} client:load /> */}
+        <UserDropdown user={session?.user || null} />
       </div>
 
       <div className="flex w-full items-center justify-end gap-4 px-6 py-4 sm:hidden">
-        {/* <NavBarMenu user={session?.user || null} client:load /> */}
+        <NavbarMenu user={session?.user || null} />
       </div>
     </nav>
   );
