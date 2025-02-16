@@ -1,16 +1,17 @@
 import { authConfig } from "@/auth";
 import { certificates, db, events, presenters, users } from "@/database";
 import { certificateSchema } from "@/types/Certificate";
-import { aliasedTable, eq } from "drizzle-orm";
-import { getServerSession } from "next-auth";
+import { eq } from "drizzle-orm";
+import { getServerSession, Session } from "next-auth";
 
 import CertificateCard from "@/components/dashboard/CertificateCard";
+import { alias } from "drizzle-orm/sqlite-core";
 
 export default async function CertificatesPage() {
-  const session = await getServerSession(authConfig);
+  const session = (await getServerSession(authConfig)) as Session;
   const user = session.user!;
 
-  const presenterUser = aliasedTable(users, "presenterUser");
+  const presenterUser = alias(users, "presenterUser");
 
   const rows = await db
     .select({

@@ -28,7 +28,7 @@
     "@vercel/blob": "^0.27.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "cmdk": "1.0.0",
+    "cmdk": "^1.0.4",
     "drizzle-orm": "^0.39.3",
     "fs-extra": "^11.3.0",
     "jspdf": "^2.5.2",
