@@ -147,7 +147,9 @@ export const DatetimePicker = forwardRef<HTMLDivElement, DateTimeInput>(
   ) => {
     const handleDateChange = useCallback(
       (nextDate: Date | undefined) => {
-        onChange ? onChange(nextDate) : console.log(nextDate);
+        if (onChange) {
+          onChange(nextDate);
+        }
       },
       [onChange],
     );

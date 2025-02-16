@@ -28,6 +28,7 @@ interface MultiSelectorProps
 
 interface MultiSelectContextProps {
   value: string[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onValueChange: (value: any) => void;
   open: boolean;
   setOpen: (value: boolean) => void;
@@ -270,7 +271,7 @@ MultiSelectorTrigger.displayName = "MultiSelectorTrigger";
 const MultiSelectorInput = forwardRef<
   React.ElementRef<typeof CommandPrimitive.Input>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>
->(({ className, ...props }, ref) => {
+>(({ className, ...props }) => {
   const {
     setOpen,
     inputValue,

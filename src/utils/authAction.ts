@@ -2,7 +2,7 @@ import { authConfig } from "@/auth";
 import { User } from "@/types/User";
 import { getServerSession } from "next-auth";
 
-export const authAction = <Params = void, Return = any>(
+export const authAction = <Params = void, Return = void>(
   action: (params: Params) => Promise<Return>,
   role?: User["role"],
 ) => {

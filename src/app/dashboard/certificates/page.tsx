@@ -8,7 +8,7 @@ import CertificateCard from "@/components/dashboard/CertificateCard";
 
 export default async function CertificatesPage() {
   const session = await getServerSession(authConfig);
-  const user = session?.user!;
+  const user = session.user!;
 
   const presenterUser = aliasedTable(users, "presenterUser");
 
@@ -72,7 +72,7 @@ export default async function CertificatesPage() {
       ) : (
         <div className="grid flex-1 grid-cols-1 gap-4 @3xl:grid-cols-2 @7xl:grid-cols-3">
           {parsed.map((c) => (
-            <CertificateCard certificate={c} />
+            <CertificateCard key={c.id} certificate={c} />
           ))}
         </div>
       )}
