@@ -1,11 +1,13 @@
 "use server";
 
+import { authConfig } from "@/auth";
 import { certificates, db, participants, users } from "@/database";
 import { Event } from "@/types/Event";
 import { createPaginationSchema } from "@/types/Pagination";
 import { userSchema } from "@/types/User";
 import { authAction } from "@/utils/authAction";
 import { and, count, eq } from "drizzle-orm";
+import { getServerSession, Session } from "next-auth";
 import { z } from "zod";
 
 const schema = createPaginationSchema(
@@ -60,3 +62,20 @@ export const getParticipants = authAction(
   },
   "admin",
 );
+
+export const currentUserIsRegistered = authAction(async (id: Event["id"]) => {
+  const session = (await getServerSession(authConfig)) as Session;
+
+  const result = await db
+    .select()
+    .from(participants)
+    .where(
+      and(
+        eq(participants.eventId, id),
+        eq(participants.userId, session.user.id),
+      ),
+    )
+    .get();
+
+  return !!result;
+});

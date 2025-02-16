@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Clock, Pencil, Users } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { registerUserToEvent, unregisterUserFromEvent } from "@/actions/events";
+import { currentUserIsRegistered } from "@/actions/participants";
 
 interface Props {
   event: Event;
@@ -18,6 +19,12 @@ interface Props {
 export default function EventCard({ event, presenters }: Props) {
   const { data: session } = useSession();
   const [isRegistered, setIsRegistered] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      setIsRegistered(await currentUserIsRegistered(event.id));
+    })();
+  }, [event]);
 
   const parsedDate = new Date(event.date).toLocaleDateString("es-ES", {
     year: "numeric",
