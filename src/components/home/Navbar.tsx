@@ -2,9 +2,10 @@ import { getServerSession } from "next-auth";
 import Logo from "../svg/Logo";
 import UserDropdown from "./UserDropdown";
 import NavbarMenu from "./NavBarMenu";
+import { authConfig } from "@/auth";
 
 export default async function Navbar() {
-  const session = await getServerSession();
+  const session = await getServerSession(authConfig);
 
   return (
     <nav className="fixed left-0 top-0 z-10 flex w-full">

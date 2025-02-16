@@ -8,6 +8,8 @@ import { drizzle } from "drizzle-orm/libsql";
 import type { AdapterAccount } from "next-auth/adapters";
 import { env } from "@/env";
 import { createClient } from "@libsql/client";
+import { Event } from "@/types/Event";
+import { User } from "@/types/User";
 
 const client = createClient({
   url: env.DB_URL,
@@ -24,6 +26,7 @@ export const users = sqliteTable("user", {
   email: text("email").unique(),
   emailVerified: integer("emailVerified", { mode: "timestamp_ms" }),
   image: text("image"),
+  role: text().notNull().$type<User["role"]>().default("user"),
 });
 
 export const accounts = sqliteTable(
@@ -94,3 +97,63 @@ export const authenticators = sqliteTable(
     }),
   ],
 );
+
+export const events = sqliteTable("event", {
+  id: text()
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  name: text().notNull(),
+  image: text().notNull(),
+  date: integer({ mode: "timestamp" }).notNull(),
+  duration: integer().notNull(),
+  done: integer({ mode: "boolean" }).notNull().default(false),
+  active: integer({ mode: "boolean" }).notNull().default(false),
+  limit: integer(),
+  type: text().notNull().$type<Event["type"]>().default("workshop"),
+});
+
+export const presenters = sqliteTable(
+  "presenter",
+  {
+    userId: text("userId")
+      .notNull()
+      .references(() => users.id),
+    eventId: text("eventId")
+      .notNull()
+      .references(() => events.id),
+  },
+  (presenter) => [
+    primaryKey({
+      columns: [presenter.userId, presenter.eventId],
+    }),
+  ],
+);
+
+export const participants = sqliteTable(
+  "participant",
+  {
+    userId: text("userId")
+      .notNull()
+      .references(() => users.id),
+    eventId: text("eventId")
+      .notNull()
+      .references(() => events.id),
+  },
+  (participant) => [
+    primaryKey({
+      columns: [participant.userId, participant.eventId],
+    }),
+  ],
+);
+
+export const certificates = sqliteTable("certificate", {
+  id: text()
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  eventId: text("eventId")
+    .notNull()
+    .references(() => events.id),
+  userId: text("userId")
+    .notNull()
+    .references(() => users.id),
+});

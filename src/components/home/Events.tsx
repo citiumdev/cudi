@@ -1,4 +1,18 @@
-export default function Events() {
+import { db, events } from "@/database";
+import { eventSchema } from "@/types/Event";
+import { desc } from "drizzle-orm";
+import EventCard from "./EventCard";
+
+export default async function Events() {
+  const rows = await db
+    .select()
+    .from(events)
+    .orderBy(events.done, desc(events.active), events.date)
+    .limit(3);
+
+  const result = eventSchema.array().safeParse(rows);
+  const parsed = result.success ? result.data : [];
+
   return (
     <section
       id="events"
@@ -15,25 +29,23 @@ export default function Events() {
           el calendario a continuación y únete a nosotros en nuestras próximas
           actividades. ¡Te esperamos!
         </p>
-        {/* { */}
-        {/* events.length ? ( */}
-        {/*   <div className="mt-4 grid flex-1 grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4"> */}
-        {/*     {parsed.map((e) => ( */}
-        {/*       <EventCard event={e} /> */}
-        {/*     ))} */}
-        {/*     <a */}
-        {/*       href="/dashboard" */}
-        {/*       className="flex h-full w-full items-center justify-center rounded-md bg-neutral-900 px-4 py-6 text-neutral-100 transition-all hover:bg-neutral-800/70" */}
-        {/*     > */}
-        {/*       <span className="text-sm font-bold">Ver todos los eventos</span> */}
-        {/*     </a> */}
-        {/*   </div> */}
-        {/* ) : ( */}
-        <div className="mt-4 flex h-96 items-center justify-center rounded-lg bg-chetwode-500/10 p-4">
-          <h2 className="text-2xl font-bold">Proximamente... ;)</h2>
-        </div>
-        {/*   ) */}
-        {/* } */}
+        {parsed.length ? (
+          <div className="mt-4 grid flex-1 grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {parsed.map((e) => (
+              <EventCard key={e.id} event={e} />
+            ))}
+            <a
+              href="/dashboard"
+              className="flex h-full w-full items-center justify-center rounded-md bg-neutral-900 px-4 py-6 text-neutral-100 transition-all hover:bg-neutral-800/70"
+            >
+              <span className="text-sm font-bold">Ver todos los eventos</span>
+            </a>
+          </div>
+        ) : (
+          <div className="mt-4 flex h-96 items-center justify-center rounded-lg bg-chetwode-500/10 p-4">
+            <h2 className="text-2xl font-bold">Proximamente... ;)</h2>
+          </div>
+        )}
       </div>
     </section>
   );
