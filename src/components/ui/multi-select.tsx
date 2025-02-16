@@ -268,10 +268,10 @@ const MultiSelectorTrigger = forwardRef<
 
 MultiSelectorTrigger.displayName = "MultiSelectorTrigger";
 
-const MultiSelectorInput = forwardRef<
-  React.ElementRef<typeof CommandPrimitive.Input>,
-  React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>
->(({ className, ...props }) => {
+const MultiSelectorInput = ({
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>) => {
   const {
     setOpen,
     inputValue,
@@ -300,7 +300,7 @@ const MultiSelectorInput = forwardRef<
       )}
     />
   );
-});
+};
 
 MultiSelectorInput.displayName = "MultiSelectorInput";
 
