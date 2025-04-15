@@ -25,7 +25,11 @@ export default async function Dashboard() {
   const result = rows.reduce<
     Record<
       string,
-      { event: DBEvent; presenters: DBUser[]; participantsId: string[] }
+      {
+        event: DBEvent;
+        presenters: Record<string, DBUser>;
+        participantsId: Set<string>;
+      }
     >
   >((acc, row) => {
     const rowEvent = row.event;
@@ -35,17 +39,17 @@ export default async function Dashboard() {
     if (!acc[rowEvent.id]) {
       acc[rowEvent.id] = {
         event: rowEvent,
-        presenters: [],
-        participantsId: [],
+        presenters: {},
+        participantsId: new Set(),
       };
     }
 
     if (rowPresenter) {
-      acc[rowEvent.id].presenters.push(rowPresenter);
+      acc[rowEvent.id].presenters[rowPresenter.id] = rowPresenter;
     }
 
     if (rowParticipant) {
-      acc[rowEvent.id].participantsId.push(rowParticipant.userId);
+      acc[rowEvent.id].participantsId.add(rowParticipant.userId);
     }
 
     return acc;
@@ -59,7 +63,13 @@ export default async function Dashboard() {
     })
     .array();
 
-  const parsed = schema.parse(Object.values(result));
+  const parsed = schema.parse(
+    Object.values(result).map((r) => ({
+      event: r.event,
+      presenters: Object.values(r.presenters),
+      participantsId: [...r.participantsId],
+    })),
+  );
 
   return (
     <div className="@container">
