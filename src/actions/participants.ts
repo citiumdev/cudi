@@ -27,8 +27,13 @@ export const getParticipants = authAction(
     limit?: number;
     page?: number;
   }) => {
+    const total = await db
+      .select({ count: count() })
+      .from(participants)
+      .where(eq(participants.eventId, id));
+
     const result = await db
-      .select({ count: count(), user: users, certificate: certificates })
+      .select({ user: users, certificate: certificates })
       .from(participants)
       .innerJoin(users, eq(users.id, participants.userId))
       .leftJoin(
@@ -42,22 +47,17 @@ export const getParticipants = authAction(
       .limit(limit)
       .offset(page * limit);
 
-    const parsed =
-      result.length && result[0].count
-        ? result.map((data) => ({
-            user: data.user,
-            certificate: data.certificate?.id || null,
-          }))
-        : [];
-
-    const total = result.length ? result[0].count : 0;
+    const parsed = result.map((data) => ({
+      user: data.user,
+      certificate: data.certificate?.id || null,
+    }));
 
     return schema.parse({
       data: parsed,
       limit,
       page,
       pageSize: parsed.length,
-      total,
+      total: total[0].count,
     });
   },
   "admin",

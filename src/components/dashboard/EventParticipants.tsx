@@ -33,18 +33,19 @@ export default function EventParticipants({ event }: Props) {
   const [isDone, setIsDone] = useState(event.done);
   const [isActive, setIsActive] = useState(event.active);
 
-  const { data, status, refetch } = useInfiniteQuery({
-    queryKey: ["eventParticipants", { eventId: event.id }],
-    queryFn: async ({ pageParam }) =>
-      await getParticipants({
-        id: event.id,
-        page: pageParam,
-      }),
-    initialPageParam: 0,
-    getNextPageParam: ({ total, pageSize, page }) => {
-      return total - pageSize * (page + 1) > 0 ? page + 1 : undefined;
-    },
-  });
+  const { data, status, refetch, fetchNextPage, hasNextPage } =
+    useInfiniteQuery({
+      queryKey: ["eventParticipants", { eventId: event.id }],
+      queryFn: async ({ pageParam }) =>
+        await getParticipants({
+          id: event.id,
+          page: pageParam,
+        }),
+      initialPageParam: 0,
+      getNextPageParam: ({ total, pageSize, page }) => {
+        return total - pageSize * (page + 1) > 0 ? page + 1 : undefined;
+      },
+    });
 
   const handleDone = async () => {
     const { success } = await markEventAsDone(event.id);
@@ -83,7 +84,9 @@ export default function EventParticipants({ event }: Props) {
   return (
     <div className="mt-8 flex w-full flex-col">
       <div className="flex items-center justify-between">
-        <h2 className="mb-4 text-2xl font-bold">Participantes</h2>
+        <h2 className="mb-4 text-2xl font-bold">
+          Participantes ({data ? data.pages[0].total : 0})
+        </h2>
         <div className="flex items-center gap-2">
           <Button
             size="sm"
@@ -180,7 +183,13 @@ export default function EventParticipants({ event }: Props) {
             </Table>
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
-          <Button size="sm" variant="outline" className="mt-4">
+          <Button
+            size="sm"
+            variant="outline"
+            className="mt-4"
+            onClick={() => fetchNextPage()}
+            disabled={!hasNextPage}
+          >
             Cargar más
           </Button>
         </>
