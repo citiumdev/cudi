@@ -18,11 +18,13 @@ interface Props {
 
 export default function EventCard({ event, presenters }: Props) {
   const { data: session } = useSession();
+  const [isLoading, setIsLoading] = useState(true);
   const [isRegistered, setIsRegistered] = useState(false);
 
   useEffect(() => {
     (async () => {
       setIsRegistered(await currentUserIsRegistered(event.id));
+      setIsLoading(false);
     })();
   }, [event]);
 
@@ -141,7 +143,7 @@ export default function EventCard({ event, presenters }: Props) {
                   : "Aún no disponible"}
             </p>
             <Button
-              disabled={event.done || !event.active}
+              disabled={event.done || !event.active || isLoading}
               onClick={isRegistered ? handleUnregister : handleRegister}
               variant={isRegistered && !event.done ? "destructive" : "default"}
             >
