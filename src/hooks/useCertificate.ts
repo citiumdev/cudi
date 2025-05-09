@@ -114,7 +114,16 @@ export default function useCertificate(certificate: Certificate) {
 
       ctx.drawImage(qr, 902, 67);
 
-      ctx.drawImage(signature, 921, 264, 119, 124);
+      const signatureRatio = signature.width / signature.height;
+      const signatureHeight = 52;
+      const signatureWidth = signatureRatio * signatureHeight;
+      ctx.drawImage(
+        signature,
+        977 - signatureWidth / 2,
+        680 - signatureHeight,
+        signatureWidth,
+        signatureHeight,
+      );
 
       ctx.fillStyle = "white";
       ctx.textBaseline = "bottom";
@@ -127,9 +136,9 @@ export default function useCertificate(certificate: Certificate) {
       textWithMetrics(ctx, date, 79, 695);
       textWithMetrics(ctx, url, 250, 695);
 
-      ctx.font = "700 16pt Roboto Flex Variable";
+      ctx.font = "700 9pt Roboto Flex Variable";
       ctx.textAlign = "center";
-      textWithMetrics(ctx, presenter, 981, 401);
+      textWithMetrics(ctx, presenter, 977, 684);
 
       setImage(canvas.toDataURL("image/png"));
     })();
