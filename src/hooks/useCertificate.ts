@@ -1,9 +1,17 @@
 import type { Certificate } from "@/types/Certificate";
 import { useCallback, useEffect, useState } from "react";
 import TemplateImage from "@/assets/template.png";
-import SignatureImage from "@/assets/signature.png";
 import QRCodeStyling from "qr-code-styling";
 import { jsPDF } from "jspdf";
+
+import SignatureImage0 from "@/assets/signatures/fallback.png";
+import SignatureImage1 from "@/assets/signatures/1c4cbab1-a6ee-4a8c-82c9-8f0b586f460b.png";
+import SignatureImage2 from "@/assets/signatures/65e3e7d2-f40f-4bd4-9088-55dbdad7d93a.png";
+
+const signatures = {
+  "1c4cbab1-a6ee-4a8c-82c9-8f0b586f460b": SignatureImage1,
+  "65e3e7d2-f40f-4bd4-9088-55dbdad7d93a": SignatureImage2,
+};
 
 export default function useCertificate(certificate: Certificate) {
   const [canvas, setCanvas] = useState<HTMLCanvasElement | null>(null);
@@ -38,6 +46,12 @@ export default function useCertificate(certificate: Certificate) {
     },
     [],
   );
+
+  const getSignature = (presenterId: string) => {
+    return (
+      signatures[presenterId as keyof typeof signatures] || SignatureImage0
+    );
+  };
 
   const loadImage = async (src: string | Blob) => {
     return new Promise<HTMLImageElement>((resolve) => {
@@ -80,6 +94,7 @@ export default function useCertificate(certificate: Certificate) {
       const url = `cudicoders.dev/c/${certificate.id}`;
 
       const presenter = certificate.presenters[0].name;
+      const presenterSignature = getSignature(certificate.presenters[0].id);
 
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d")!;
@@ -101,7 +116,7 @@ export default function useCertificate(certificate: Certificate) {
       const [template, qr, signature] = await Promise.all([
         loadImage(TemplateImage.src),
         loadImage((await qrCode.getRawData("png")) as Blob),
-        loadImage(SignatureImage.src),
+        loadImage(presenterSignature.src),
       ]);
 
       canvas.height = template.height;
