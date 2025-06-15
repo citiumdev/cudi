@@ -3,6 +3,7 @@ import {
   sqliteTable,
   text,
   primaryKey,
+  uniqueIndex,
 } from "drizzle-orm/sqlite-core";
 import { drizzle } from "drizzle-orm/libsql";
 import type { AdapterAccount } from "next-auth/adapters";
@@ -156,4 +157,6 @@ export const certificates = sqliteTable("certificate", {
   userId: text("userId")
     .notNull()
     .references(() => users.id),
-});
+}, (table)=> [
+    uniqueIndex("certificate_eventId_userId").on(table.eventId, table.userId)
+  ]);
