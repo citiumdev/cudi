@@ -1,4 +1,6 @@
+import Link from "next/link";
 import Logo from "../svg/Logo";
+import { Button } from "../ui/button";
 
 export default function Hero() {
   return (
@@ -15,6 +17,11 @@ export default function Hero() {
             <p className="mt-2 text-lg italic text-chetwode-500 md:text-xl">
               &quot; En busca de la excelencia &quot;
             </p>
+            <Button className="mt-6" asChild>
+              <Link href="/dashboard" >
+                Ingresar
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
