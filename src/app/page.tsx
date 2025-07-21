@@ -5,6 +5,7 @@ import About from "@/components/home/About";
 import Events from "@/components/home/Events";
 import Contact from "@/components/home/Contact";
 import Footer from "@/components/home/Footer";
+import Sponsors from "@/components/home/Sponsors";
 
 export default function Home() {
   return (
@@ -12,6 +13,7 @@ export default function Home() {
       <Gradient />
       <Navbar />
       <Hero />
+      <Sponsors />
       <About />
       <Events />
       <Contact />
